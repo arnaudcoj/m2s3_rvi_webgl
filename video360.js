@@ -27,7 +27,7 @@ var mouseDown=false;
 var nbCount=0;
 
 var nbSlice = 20;
-var nbStack = 10;
+var nbStack = 20;
 
 
 /**
@@ -81,7 +81,7 @@ function init() {
     projection.setFrustum(-0.1, 0.1, -0.1, 0.1, 0.1, 1000);
 
     shader360 = initProgram("shader360");
-    texture360 = initTexture("earthDay");
+    texture360 = initTexture("repas");
     triangleVAO = initTriangleVAO();
     sphereVAO = initSphereVAO();
 }
@@ -139,8 +139,8 @@ function initSphereVAO() {
             position.push(Math.cos(stackAngle));
             position.push(Math.sin(sliceAngle) * Math.sin(stackAngle));
 
-            texture.push(1. - sliceAngle / (2. * Math.PI));
-            texture.push(1. - stackAngle / Math.PI);
+            texture.push(sliceAngle / (2. * Math.PI));
+            texture.push(stackAngle / Math.PI);
 
             element.push((i+1)*nbSlice + j);
             element.push(i*nbSlice + j);
@@ -188,10 +188,14 @@ function initSphereVAO() {
  * **/
 
 function update() {
-    angle += 0.01;
+    //angle += 0.01;
     modelview.setIdentity();
     modelview.translate(0,0,-4);
     modelview.rotateX(angle);
+    var imageData = document.getElementById("repas");
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture360);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, imageData);
 }
 
 
@@ -212,8 +216,8 @@ function draw() {
     var projectionLocation = gl.getUniformLocation(shader360, "projection");
     gl.uniformMatrix4fv(projectionLocation, gl.FALSE, projection.fv);
 
-    gl.bindVertexArray(triangleVAO);
-    gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
+    //gl.bindVertexArray(triangleVAO);
+    //gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
 
     gl.bindVertexArray(sphereVAO);
     //length is weird, don't know why
