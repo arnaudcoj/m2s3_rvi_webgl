@@ -26,6 +26,9 @@ var mouseDown=false;
 
 var nbCount=0;
 
+var nbSlice = 20
+var nbStack = 20
+
 
 /**
  * main, mainLoop
@@ -36,21 +39,21 @@ function main() {
     canvasGL=document.getElementById("canvasGL");
     gl=canvasGL.getContext("webgl2");
     if (!gl) {
-      alert("cant support webGL2 context");
+	alert("cant support webGL2 context");
     }
     else {
-      console.log(
-        gl.getParameter( gl.VERSION ) + " | " +
-        gl.getParameter( gl.VENDOR ) + " | " +
-        gl.getParameter( gl.RENDERER ) + " | " +
-        gl.getParameter( gl.SHADING_LANGUAGE_VERSION )
-      );
-      init();
-      mainLoop();
-   		// callback from mouse down
-      canvasGL.addEventListener('mousedown',handleMouseDown,false);
-      canvasGL.addEventListener('mousemove',handleMouseMove,false);
-      canvasGL.addEventListener('mouseup',handleMouseUp,false);
+	console.log(
+            gl.getParameter( gl.VERSION ) + " | " +
+		gl.getParameter( gl.VENDOR ) + " | " +
+		gl.getParameter( gl.RENDERER ) + " | " +
+		gl.getParameter( gl.SHADING_LANGUAGE_VERSION )
+	);
+	init();
+	mainLoop();
+   	// callback from mouse down
+	canvasGL.addEventListener('mousedown',handleMouseDown,false);
+	canvasGL.addEventListener('mousemove',handleMouseMove,false);
+	canvasGL.addEventListener('mouseup',handleMouseUp,false);
 
     }
 }
@@ -118,8 +121,6 @@ function initTriangleVAO() {
 }
 
 function initSphereVAO() {
-    var nbSlice = 20
-    var nbStack = 20
 
     var sliceAngle;
     var stackAngle;
@@ -130,27 +131,28 @@ function initSphereVAO() {
 
     for(var i = 0; i < nbStack; i++) {
 
-      for(var j = 0; j < nbSlice; j++) {
-        sliceAngle = i * Math.PI / nbSlice;
-        stackAngle = j * 2 * Math.PI / nbStack;
+	for(var j = 0; j < nbSlice; j++) {
+            sliceAngle = j * 2 * Math.PI / (nbSlice-1);
+            stackAngle = i * Math.PI / (nbStack-1);
 
-        position.push(Math.cos(sliceAngle) * Math.sin(stackAngle));
-        position.push(Math.cos(stackAngle));
-        position.push(Math.sin(sliceAngle) * Math.sin(stackAngle));
+            position.push(Math.cos(sliceAngle) * Math.sin(stackAngle));
+            position.push(Math.cos(stackAngle));
+            position.push(Math.sin(sliceAngle) * Math.sin(stackAngle));
 
-        //texture.push(sliceAngle / 2 * Math.PI);
-        //texture.push(stackAngle / Math.PI);
-        texture.push(1. - sliceAngle / (2. * Math.PI));
-        texture.push(1. - stackAngle / Math.PI);
+            //texture.push(sliceAngle / 2 * Math.PI);
+            //texture.push(stackAngle / Math.PI);
+            texture.push(1. - sliceAngle / (2. * Math.PI));
+            texture.push(1. - stackAngle / Math.PI);
 
-        element.push((i+1)*nbSlice + j + 1); // haut gauche
-        element.push(i*nbSlice + j); // bas gauche
-        element.push(i*nbSlice + j + 1); // bas droit
-        element.push(i*nbSlice + j + 1); // bas droit
-        element.push((i+1)*nbSlice + j + 2); // haut droit
-        element.push((i+1)*nbSlice + j + 1); // haut gauche
-      }
+            element.push((i+1)*nbSlice + j); // haut gauche
+            element.push(i*nbSlice + j); // bas gauche
+            element.push(i*nbSlice + j + 1); // bas droit
+            element.push(i*nbSlice + j + 1); // bas droit
+            element.push((i+1)*nbSlice + j + 1); // haut droit
+            element.push((i+1)*nbSlice + j); // haut gauche
+	}
     }
+    console.log(element.length);
 
     //TODO pas de sphere affichée
 
@@ -189,12 +191,12 @@ function initSphereVAO() {
  * update :
  * **/
 
- function update() {
-   angle += 0.01;
-   modelview.setIdentity();
-   modelview.translate(0,0,-4);
-   modelview.rotateX(angle);
- }
+function update() {
+    angle += 0.01;
+    modelview.setIdentity();
+    modelview.translate(0,0,-4);
+    modelview.rotateX(angle);
+}
 
 
 
@@ -202,26 +204,26 @@ function initSphereVAO() {
  * draw
  * **/
 function draw() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.useProgram(shader360);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(shader360);
 
-  var textureLocation = gl.getUniformLocation(shader360, "image");
-  gl.uniform1i(textureLocation, 0);
+    var textureLocation = gl.getUniformLocation(shader360, "image");
+    gl.uniform1i(textureLocation, 0);
 
-  var modelviewLocation = gl.getUniformLocation(shader360, "modelview");
-  gl.uniformMatrix4fv(modelviewLocation, gl.FALSE, modelview.fv);
+    var modelviewLocation = gl.getUniformLocation(shader360, "modelview");
+    gl.uniformMatrix4fv(modelviewLocation, gl.FALSE, modelview.fv);
 
-  var projectionLocation = gl.getUniformLocation(shader360, "projection");
-  gl.uniformMatrix4fv(projectionLocation, gl.FALSE, projection.fv);
+    var projectionLocation = gl.getUniformLocation(shader360, "projection");
+    gl.uniformMatrix4fv(projectionLocation, gl.FALSE, projection.fv);
 
-  gl.bindVertexArray(triangleVAO);
-  gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
+    gl.bindVertexArray(triangleVAO);
+    gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
 
-  gl.bindVertexArray(sphereVAO);
-  gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
+    gl.bindVertexArray(sphereVAO);
+    gl.drawElements(gl.TRIANGLES, nbSlice * (nbStack-1) * 6 - 2, gl.UNSIGNED_SHORT, 0);
 
-  gl.useProgram(null);
-  gl.bindVertexArray(null);
+    gl.useProgram(null);
+    gl.bindVertexArray(null);
 
 }
 
@@ -231,27 +233,27 @@ function draw() {
  *  reads shader (sources in html : tag <script ...type="x-shader"> ) and compile
  * **/
 function compileShader(id) {
-  var shaderScript = document.getElementById(id);
-  var k = shaderScript.firstChild;
-  var str=k.textContent;
-  console.log(str);
-  var shader;
-  if (shaderScript.type == "x-shader/x-fragment") {
-     shader = gl.createShader(gl.FRAGMENT_SHADER);
-  }
-  else if (shaderScript.type == "x-shader/x-vertex") {
-    shader = gl.createShader(gl.VERTEX_SHADER);
-  }
-  gl.shaderSource(shader, str);
-  gl.compileShader(shader);
+    var shaderScript = document.getElementById(id);
+    var k = shaderScript.firstChild;
+    var str=k.textContent;
+    console.log(str);
+    var shader;
+    if (shaderScript.type == "x-shader/x-fragment") {
+	shader = gl.createShader(gl.FRAGMENT_SHADER);
+    }
+    else if (shaderScript.type == "x-shader/x-vertex") {
+	shader = gl.createShader(gl.VERTEX_SHADER);
+    }
+    gl.shaderSource(shader, str);
+    gl.compileShader(shader);
 
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert(id+"\n"+gl.getShaderInfoLog(shader));
-    return null;
-  }
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+	alert(id+"\n"+gl.getShaderInfoLog(shader));
+	return null;
+    }
 
-  return shader;
- }
+    return shader;
+}
 
 /** ******************************************* */
 /** create the program shader (vertex+fragment) :
@@ -259,17 +261,17 @@ function compileShader(id) {
  *
  */
 function initProgram(id) {
-	var programShader=gl.createProgram();
-	var vert=compileShader(id+"-vs");
-	var frag=compileShader(id+"-fs");
-	gl.attachShader(programShader,vert);
-	gl.attachShader(programShader,frag);
-	gl.linkProgram(programShader);
-	if (!gl.getProgramParameter(programShader,gl.LINK_STATUS)) {
-		alert(gl.getProgramInfoLog(programShader));
-		return null;
-	}
-	return programShader;
+    var programShader=gl.createProgram();
+    var vert=compileShader(id+"-vs");
+    var frag=compileShader(id+"-fs");
+    gl.attachShader(programShader,vert);
+    gl.attachShader(programShader,frag);
+    gl.linkProgram(programShader);
+    if (!gl.getProgramParameter(programShader,gl.LINK_STATUS)) {
+	alert(gl.getProgramInfoLog(programShader));
+	return null;
+    }
+    return programShader;
 }
 
 /** *****************************************************
@@ -277,21 +279,21 @@ function initProgram(id) {
  * **/
 
 function initTexture(id) {
-	var imageData=document.getElementById(id);
-	console.log(imageData.nodeType);
+    var imageData=document.getElementById(id);
+    console.log(imageData.nodeType);
 
-	var textureId=gl.createTexture();
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D,textureId);
+    var textureId=gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D,textureId);
 
-	gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, imageData);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, imageData);
 
-	return textureId;
+    return textureId;
 
 }
 
@@ -301,15 +303,15 @@ function initTexture(id) {
  *
  */
 function handleMouseDown(event) {
-	// get the mouse relative to canvas
-	oldMouseX = event.layerX-canvasGL.offsetLeft;
-	oldMouseY = canvasGL.height-(event.layerY-canvasGL.offsetTop)-1.0;
-	mouseDown=true;
+    // get the mouse relative to canvas
+    oldMouseX = event.layerX-canvasGL.offsetLeft;
+    oldMouseY = canvasGL.height-(event.layerY-canvasGL.offsetTop)-1.0;
+    mouseDown=true;
 }
 
 function handleMouseMove(event) {
-	// get the mouse relative to canvas
-	if (mouseDown) {
+    // get the mouse relative to canvas
+    if (mouseDown) {
 	var mouseX = event.layerX-canvasGL.offsetLeft;
 	var mouseY = canvasGL.height-(event.layerY-canvasGL.offsetTop)-1.0;
 
@@ -317,9 +319,9 @@ function handleMouseMove(event) {
 
 	oldMouseX=mouseX;
 	oldMouseY=mouseY;
-	}
+    }
 }
 
 function handleMouseUp(event) {
-	mouseDown=false;
+    mouseDown=false;
 }
