@@ -78,11 +78,13 @@ function init() {
 
     projection = new Mat4();
     modelview = new Mat4();
+    modelview.translate(0,0,0);
+
     projection.setFrustum(-0.1, 0.1, -0.1, 0.1, 0.1, 1000);
 
     shader360 = initProgram("shader360");
     texture360 = initTexture("repas");
-    triangleVAO = initTriangleVAO();
+//    triangleVAO = initTriangleVAO();
     sphereVAO = initSphereVAO();
 }
 
@@ -188,10 +190,9 @@ function initSphereVAO() {
  * **/
 
 function update() {
-    //angle += 0.01;
+    angle += 0.01;
     modelview.setIdentity();
-    modelview.translate(0,0,-4);
-    modelview.rotateX(angle);
+    modelview.rotateY(angle);
     var imageData = document.getElementById("repas");
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture360);
