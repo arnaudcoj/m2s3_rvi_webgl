@@ -79,6 +79,7 @@ function init() {
 
     shader360 = initProgram("shader360");
     texture360 = initTexture("earthDay");
+    triangleVAO = initTriangleVAO();
     sphereVAO = initSphereVAO();
 }
 
@@ -120,11 +121,8 @@ function initSphereVAO() {
     var nbSlice = 20
     var nbStack = 20
 
-    var sliceStep = 2*Math.PI / nbSlice;
-    var stackStep = Math.PI / nbStack;
-
-    var sliceAngle = 0.0;
-    var stackAngle = 0.0;
+    var sliceAngle;
+    var stackAngle;
 
     var position = [];
     var texture = [];
@@ -132,8 +130,10 @@ function initSphereVAO() {
 
     for(var i = 0; i < nbStack; i++) {
 
-      sliceAngle = 0.0;
       for(var j = 0; j < nbSlice; j++) {
+        sliceAngle = i * Math.PI / nbSlice;
+        stackAngle = j * 2 * Math.PI / nbStack;
+
         position.push(Math.cos(sliceAngle) * Math.sin(stackAngle));
         position.push(Math.cos(stackAngle));
         position.push(Math.sin(sliceAngle) * Math.sin(stackAngle));
@@ -142,8 +142,6 @@ function initSphereVAO() {
         //texture.push(stackAngle / Math.PI);
         texture.push(1. - sliceAngle / (2. * Math.PI));
         texture.push(1. - stackAngle / Math.PI);
-        sliceAngle += sliceStep;
-
 
         element.push((i+1)*nbSlice + j + 1); // haut gauche
         element.push(i*nbSlice + j); // bas gauche
@@ -152,8 +150,6 @@ function initSphereVAO() {
         element.push((i+1)*nbSlice + j + 2); // haut droit
         element.push((i+1)*nbSlice + j + 1); // haut gauche
       }
-
-      stackAngle += stackStep;
     }
 
     //TODO pas de sphere affichée
@@ -222,7 +218,7 @@ function draw() {
   gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
 
   gl.bindVertexArray(sphereVAO);
-  gl.drawElements(gl.TRIANGLE_STRIP, 3, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
 
   gl.useProgram(null);
   gl.bindVertexArray(null);
