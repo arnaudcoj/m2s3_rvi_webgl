@@ -26,8 +26,8 @@ var mouseDown=false;
 
 var nbCount=0;
 
-var nbSlice = 20
-var nbStack = 20
+var nbSlice = 20;
+var nbStack = 10;
 
 
 /**
@@ -139,23 +139,19 @@ function initSphereVAO() {
             position.push(Math.cos(stackAngle));
             position.push(Math.sin(sliceAngle) * Math.sin(stackAngle));
 
-            //texture.push(sliceAngle / 2 * Math.PI);
-            //texture.push(stackAngle / Math.PI);
             texture.push(1. - sliceAngle / (2. * Math.PI));
             texture.push(1. - stackAngle / Math.PI);
 
-            element.push((i+1)*nbSlice + j); // haut gauche
-            element.push(i*nbSlice + j); // bas gauche
-            element.push(i*nbSlice + j + 1); // bas droit
-            element.push(i*nbSlice + j + 1); // bas droit
-            element.push((i+1)*nbSlice + j + 1); // haut droit
-            element.push((i+1)*nbSlice + j); // haut gauche
+            element.push((i+1)*nbSlice + j);
+            element.push(i*nbSlice + j);
+            element.push(i*nbSlice + j + 1);
+            element.push(i*nbSlice + j + 1);
+            element.push((i+1)*nbSlice + j + 1);
+            element.push((i+1)*nbSlice + j);
 	}
     }
-    console.log(element.length);
 
-    //TODO pas de sphere affichée
-
+    
     var sphereBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(position), gl.STATIC_DRAW);
@@ -220,6 +216,7 @@ function draw() {
     gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, 0);
 
     gl.bindVertexArray(sphereVAO);
+    //length is weird, don't know why
     gl.drawElements(gl.TRIANGLES, nbSlice * (nbStack-1) * 6 - 2, gl.UNSIGNED_SHORT, 0);
 
     gl.useProgram(null);
