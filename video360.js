@@ -18,9 +18,12 @@ var shader360;
 var texture360;
 var modelview;
 var projection;
-var angle = 0.0;
+var angleY = 0.;
+var angleX = 0.;
 var angleViewX,angleViewY;
 var oldMouseX,oldMouseY;
+var deltaMouseX = 0.;
+var deltaMouseY = 0.;
 
 var mouseDown=false;
 
@@ -190,16 +193,30 @@ function initSphereVAO() {
  * **/
 
 function update() {
-    angle += 0.01;
+    //back to 0 in order to avoid roll
+    modelview.rotateX(-angleX);
+    modelview.rotateY(-angleY);
+
+    angleY -= deltaMouseX / 200.;
+    angleX = clamp(angleX + deltaMouseY / 200., -Math.PI /2., Math.PI /2.);
+    
+    deltaMouseX = 0.;
+    deltaMouseY = 0.;
+
     modelview.setIdentity();
-    modelview.rotateY(angle);
+    //actual rotation
+    modelview.rotateX(angleX);
+    modelview.rotateY(angleY);
+    
     var imageData = document.getElementById("repas");
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture360);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, imageData);
 }
 
-
+function clamp(val, minval, maxval) {
+    return Math.max(Math.min(val, maxval), minval);
+}
 
 /**
  * draw
@@ -317,6 +334,8 @@ function handleMouseMove(event) {
 	var mouseX = event.layerX-canvasGL.offsetLeft;
 	var mouseY = canvasGL.height-(event.layerY-canvasGL.offsetTop)-1.0;
 
+	deltaMouseX = mouseX - oldMouseX;
+	deltaMouseY = mouseY - oldMouseY;
 
 
 	oldMouseX=mouseX;
