@@ -193,10 +193,6 @@ function initSphereVAO() {
 * **/
 
 function update() {
-  //back to 0 in order to avoid roll
-  modelview.rotateX(-angleX);
-  modelview.rotateY(-angleY);
-
   angleY -= deltaMouseX / 200.;
   angleX = clamp(angleX + deltaMouseY / 200., -Math.PI /2., Math.PI /2.);
 
